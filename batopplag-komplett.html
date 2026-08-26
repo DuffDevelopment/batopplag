@@ -1,0 +1,2162 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BåtOpplag – Finn vinteropplag i ditt område</title>
+  <style>
+:root {
+  --navy: #0b2942;
+  --navy-2: #123a5c;
+  --teal: #1f7a8c;
+  --teal-dark: #17606f;
+  --sky: #e8f1f5;
+  --sand: #f7f4ee;
+  --ink: #1a2b38;
+  --muted: #5a6b78;
+  --line: #d9e2e8;
+  --white: #ffffff;
+  --ok: #1f8a54;
+  --warn: #b26a00;
+  --danger: #b23a3a;
+  --radius: 12px;
+  --shadow: 0 4px 16px rgba(11, 41, 66, 0.08);
+  --shadow-lg: 0 10px 30px rgba(11, 41, 66, 0.14);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--ink);
+  background:
+    linear-gradient(180deg, var(--sky) 0%, var(--sand) 340px, var(--sand) 100%);
+  min-height: 100vh;
+  line-height: 1.55;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Topbar */
+.topbar {
+  background: var(--navy);
+  color: var(--white);
+  padding: 14px 0;
+}
+.topbar .wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.logo { font-size: 1.3rem; font-weight: 700; letter-spacing: 0.3px; }
+.tagline { color: #b9d3e2; font-size: 0.95rem; }
+
+/* Hero */
+.hero { padding: 40px 0 20px; }
+.hero h1 {
+  margin: 0 0 10px;
+  font-size: 2rem;
+  color: var(--navy);
+  line-height: 1.2;
+}
+.hero p { margin: 0 0 8px; color: var(--muted); font-size: 1.05rem; max-width: 60ch; }
+.hero .coverage { font-size: 0.92rem; }
+.hero .coverage strong { color: var(--navy); }
+
+/* Cards */
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.form-card { padding: 26px; }
+
+/* Form */
+form { display: grid; gap: 20px; }
+.field { display: grid; gap: 6px; border: 0; padding: 0; margin: 0; }
+label, legend { font-weight: 600; color: var(--navy); font-size: 0.98rem; padding: 0; }
+.hint { color: var(--muted); font-size: 0.82rem; }
+
+input[type="text"],
+input[type="number"] {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fcfdfe;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input[type="text"]:focus,
+input[type="number"]:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(31, 122, 140, 0.15);
+}
+input.invalid { border-color: var(--danger); background: #fdf5f5; }
+
+.options { display: flex; gap: 12px; flex-wrap: wrap; }
+.radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--ink);
+  background: #fcfdfe;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.radio:hover { border-color: var(--teal); }
+.radio input { accent-color: var(--teal); width: 16px; height: 16px; }
+.radio:has(input:checked) {
+  border-color: var(--teal);
+  background: rgba(31, 122, 140, 0.08);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--ink);
+  background: #fcfdfe;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.check:hover { border-color: var(--teal); }
+.check input { accent-color: var(--teal); width: 16px; height: 16px; }
+.check:has(input:checked) {
+  border-color: var(--teal);
+  background: rgba(31, 122, 140, 0.08);
+}
+.check .note { color: var(--muted); font-style: italic; font-weight: 400; font-size: 0.85rem; }
+
+.error { color: var(--danger); font-size: 0.85rem; margin: 2px 0 0; }
+
+.valgfri { font-weight: 400; color: var(--muted); font-size: 0.85rem; }
+
+.modell-funn {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+  color: var(--teal-dark);
+  background: #eef6f8;
+  border: 1px solid #cfe3e8;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.modell-funn strong { color: var(--navy); }
+.modell-funn a { color: var(--teal); text-decoration: none; font-weight: 600; }
+.modell-funn a:hover { text-decoration: underline; }
+
+/* Egen autocomplete-dropdown for båtmodell */
+.combo { position: relative; }
+.modell-dropdown {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  max-height: 280px;
+  overflow-y: auto;
+}
+.modell-dropdown li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.modell-dropdown li .navn { color: var(--navy); font-weight: 600; }
+.modell-dropdown li .fot { color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
+.modell-dropdown li.active,
+.modell-dropdown li:hover { background: rgba(31, 122, 140, 0.1); }
+.modell-dropdown .tom { color: var(--muted); font-style: italic; cursor: default; }
+.modell-dropdown .tom:hover { background: none; }
+
+.btn-primary {
+  justify-self: start;
+  background: var(--teal);
+  color: var(--white);
+  border: 0;
+  padding: 13px 28px;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.05s;
+}
+.btn-primary:hover { background: var(--teal-dark); }
+.btn-primary:active { transform: translateY(1px); }
+
+/* Results */
+.results { margin: 32px 0 60px; display: grid; gap: 16px; }
+
+.results-head { margin: 8px 0 0; }
+.results-head h2 { margin: 0 0 4px; color: var(--navy); font-size: 1.4rem; }
+.results-head p { margin: 0; color: var(--muted); }
+
+/* Recommended services banner */
+.reco {
+  background: #fff7ea;
+  border: 1px solid #f0d9ac;
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+.reco h3 { margin: 0 0 8px; color: var(--warn); font-size: 1.05rem; }
+.reco ul { margin: 0; padding-left: 18px; }
+.reco li { margin: 2px 0; }
+
+/* Site cards */
+.site {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px 22px;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.site:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+.site-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.site h3 { margin: 0; color: var(--navy); font-size: 1.2rem; }
+.site .place { color: var(--muted); font-size: 0.92rem; margin: 2px 0 0; }
+
+.badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge.innendors { background: #e3eefc; color: #1a4b8c; }
+.badge.utendors { background: #eef1f3; color: var(--muted); }
+.badge.temp-varmt { background: #fdeede; color: #b26a00; }
+.badge.temp-kaldt { background: #e6f0f5; color: #2a6b86; }
+.badge.fukt { background: #e6f4ec; color: var(--ok); }
+
+.price {
+  margin: 14px 0 12px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.price .amount { font-size: 1.6rem; font-weight: 700; color: var(--navy); }
+.price .per { color: var(--muted); font-size: 0.9rem; }
+
+.meta { display: flex; gap: 18px; flex-wrap: wrap; color: var(--muted); font-size: 0.9rem; margin-bottom: 12px; }
+.meta strong { color: var(--ink); }
+
+.price .kontakt { color: var(--muted); font-style: italic; font-size: 0.98rem; }
+
+.price.veiledende {
+  display: block;
+  background: #f2f7f9;
+  border: 1px dashed #b8ccd4;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.price.veiledende .label {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--teal-dark);
+  margin-bottom: 2px;
+}
+.price.veiledende .amount { font-size: 1.4rem; color: var(--teal-dark); }
+.price.veiledende .per { display: block; }
+.price.veiledende .disclaimer {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.ukjent { color: var(--muted); font-weight: 400; font-style: italic; }
+
+.kontakt-rad {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.kontakt-rad .lenker { display: flex; gap: 16px; }
+.kontakt-rad a { color: var(--teal); text-decoration: none; font-weight: 600; }
+.kontakt-rad a:hover { text-decoration: underline; }
+.kontakt-rad a.kilde { color: var(--muted); font-weight: 500; }
+
+.note-ukjent {
+  background: #fff7ea;
+  border: 1px solid #f0d9ac;
+  color: #7a5a1e;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 0;
+  font-size: 0.9rem;
+}
+.note-mva { color: var(--muted); font-size: 0.85rem; margin: 4px 0 0; }
+
+.merknad {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  color: #7a5a1e;
+  background: #fff7ea;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  font-size: 0.82rem;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--sand);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+.chip.match {
+  background: rgba(31, 138, 84, 0.1);
+  border-color: rgba(31, 138, 84, 0.35);
+  color: var(--ok);
+  font-weight: 600;
+}
+.chip.match::before { content: "✓ "; }
+
+/* Empty / info states */
+.empty {
+  background: var(--white);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  padding: 30px;
+  text-align: center;
+  color: var(--muted);
+}
+.empty strong { color: var(--ink); display: block; margin-bottom: 6px; font-size: 1.05rem; }
+
+/* Footer */
+.footer {
+  border-top: 1px solid var(--line);
+  padding: 20px 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.footer p { margin: 0; }
+
+@media (max-width: 560px) {
+  .hero h1 { font-size: 1.6rem; }
+  .form-card { padding: 20px; }
+  .price .amount { font-size: 1.4rem; }
+}
+
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <span class="logo">⚓ BåtOpplag</span>
+      <span class="tagline">Finn vinteropplag i ditt område</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>Sikkert vinteropplag for båten din</h1>
+      <p>Fyll inn detaljene om båten din, så finner vi opplagsplasser i nærheten som passer.</p>
+      <p class="coverage">Ekte tilbydere – databasen bygges ut område for område. Dekker nå: <strong>Lillesand, Grimstad, Arendal, Kristiansand og Oslo</strong>.</p>
+    </section>
+
+    <section class="card form-card">
+      <form id="searchForm" novalidate>
+        <div class="field">
+          <label for="postnummer">Postnummer eller sted</label>
+          <input
+            type="text"
+            id="postnummer"
+            name="postnummer"
+            inputmode="numeric"
+            placeholder="F.eks. 0250"
+            autocomplete="postal-code"
+          />
+          <small class="hint">4-sifret postnummer</small>
+          <p class="error" id="err-postnummer" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="modell">Båtmodell <span class="valgfri">(valgfritt)</span></label>
+          <div class="combo">
+            <input
+              type="text"
+              id="modell"
+              name="modell"
+              placeholder="F.eks. Nordkapp Enduro 605"
+              autocomplete="off"
+              role="combobox"
+              aria-expanded="false"
+              aria-autocomplete="list"
+              aria-controls="modell-dropdown"
+            />
+            <ul id="modell-dropdown" class="modell-dropdown" role="listbox" hidden></ul>
+          </div>
+          <small class="hint">Skriv modellen din, så finner vi lengden – eller oppgi lengde i fot nedenfor.</small>
+          <p class="modell-funn" id="modell-funn" hidden></p>
+          <p class="error" id="err-modell" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="lengde">Båtlengde (fot)</label>
+          <input
+            type="number"
+            id="lengde"
+            name="lengde"
+            min="1"
+            max="120"
+            step="1"
+            placeholder="F.eks. 27"
+          />
+          <small class="hint">Fylles ut automatisk hvis modellen gjenkjennes.</small>
+          <p class="error" id="err-lengde" hidden></p>
+        </div>
+
+        <fieldset class="field">
+          <legend>Motorplassering</legend>
+          <div class="options">
+            <label class="radio">
+              <input type="radio" name="motorplassering" value="innenbords" />
+              <span>Innenbords</span>
+            </label>
+            <label class="radio">
+              <input type="radio" name="motorplassering" value="utenbords" />
+              <span>Utenbords</span>
+            </label>
+          </div>
+          <p class="error" id="err-motorplassering" hidden></p>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>Motortype</legend>
+          <div class="options">
+            <label class="radio">
+              <input type="radio" name="takt" value="2" />
+              <span>2-takts</span>
+            </label>
+            <label class="radio">
+              <input type="radio" name="takt" value="4" />
+              <span>4-takts</span>
+            </label>
+          </div>
+          <p class="error" id="err-takt" hidden></p>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>Ønsker for opplaget</legend>
+          <small class="hint">Valgfritt – huk av det du ønsker, så filtrerer vi resultatene.</small>
+          <div class="options">
+            <label class="check">
+              <input type="checkbox" name="plassering" value="innendors" />
+              <span>Innendørs</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" name="plassering" value="utendors" />
+              <span>Utendørs</span>
+            </label>
+          </div>
+          <div class="options">
+            <label class="check">
+              <input type="checkbox" name="temperatur" value="varmt" />
+              <span>Varmt</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" name="temperatur" value="kaldt" />
+              <span>Kaldt</span>
+            </label>
+          </div>
+          <div class="options">
+            <label class="check">
+              <input type="checkbox" name="fuktkontroll" value="ja" />
+              <span>Fuktkontroll <em class="note">– anbefalt for trebåt</em></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="btn-primary">Søk etter opplag</button>
+      </form>
+    </section>
+
+    <section id="results" class="results" aria-live="polite"></section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p>Demo med eksempeldata · BåtOpplag © 2026</p>
+    </div>
+  </footer>
+
+
+  <script>
+// BåtOpplag – ekte opplagsdata, bygget område for område.
+//
+// Kun verifiserbare opplysninger fra tilbydernes egne sider / offentlige
+// oppføringer er lagt inn. Felter som ikke er publisert står som `null`
+// ("ukjent") – de er IKKE gjettet. Hver oppføring har en `kilde`-URL.
+//
+// Feltforklaring:
+//   navn          – firmanavn
+//   omrade        – område/kommune (gruppering)
+//   sted          – stedsnavn (vises til bruker)
+//   postnummer    – 4-sifret postnummer (brukes til grov nærhet); "" hvis ukjent
+//   adresse       – gateadresse (eller null)
+//   nettside      – URL til tilbyderens side (eller null)
+//   telefon       – telefonnummer (eller null)
+//   plassering    – "innendors" | "utendors" | null
+//   temperatur    – "varmt" | "kaldt" | null
+//   fuktkontroll  – true | false | null
+//   maksLengde    – største båtlengde i fot (number) | null
+//   prisPerFot    – flat sesongpris per fot (NOK) | null
+//   prisBrackets  – lengdebasert prisliste [{maks, kr}] | null (overstyrer prisPerFot)
+//   prisModell    – "perFot" (kr = pris per fot) | "total" (kr = total sesongpris
+//                   for båt opp til `maks` fot). Kun relevant med prisBrackets.
+//   prisEksMva    – true hvis prisene er oppgitt eks. mva
+//   ledigePlasser – antall ledige plasser (number) | null
+//   merknad       – kort forbehold som vises på kortet (eller null)
+//   tjenester     – liste av tjenestenøkler (kan være tom)
+//   kilde         – URL der opplysningene er hentet fra
+//
+// Gyldige tjenestenøkler (må matche SERVICE_LABELS i app.js):
+//   konservering_motor, frostsikring_kjol, spyling, bunnstoff,
+//   kranloft, vaskeplass, batterilading
+
+const STORAGE_SITES = [
+  // ========================= Lillesand =========================
+  {
+    navn: "Bjørlykke Bygg & Båtopplag AS",
+    omrade: "Lillesand",
+    sted: "Lillesand (Svåbekk)",
+    postnummer: "4790",
+    adresse: "Gamleveien 110, 4790 Lillesand",
+    nettside: "https://bjorlykkeas.no",
+    telefon: "908 80 680",
+    plassering: "innendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: [
+      { maks: 20, kr: 415 },
+      { maks: 25, kr: 474 },
+      { maks: 29, kr: 592 },
+      { maks: 34, kr: 703 },
+      { maks: 999, kr: 769 },
+    ],
+    prisModell: "perFot",
+    prisEksMva: true,
+    ledigePlasser: null,
+    merknad: null,
+    tjenester: ["konservering_motor", "bunnstoff"],
+    kilde: "https://bjorlykkeas.no/priser-kontakt",
+  },
+  {
+    navn: "IB Motorservice AS",
+    omrade: "Lillesand",
+    sted: "Lillesand",
+    postnummer: "4790",
+    adresse: "Storemyrheia 1, 4790 Lillesand",
+    nettside: "https://www.ib-motor.no",
+    telefon: "37 27 24 90",
+    plassering: null,
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: null,
+    tjenester: ["konservering_motor", "bunnstoff", "vaskeplass"],
+    kilde: "https://www.ib-motor.no/vinterlagring/",
+  },
+  {
+    navn: "Lillesand Motorsenter AS",
+    omrade: "Lillesand",
+    sted: "Lillesand",
+    postnummer: "4790",
+    adresse: null,
+    nettside: "https://www.lillesandmotorsenter.no",
+    telefon: null,
+    plassering: "innendors",
+    temperatur: "varmt", // isolert og frostfri hall
+    fuktkontroll: null,
+    maksLengde: 30, // "opp til ca. 30 fot"
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: null,
+    tjenester: ["konservering_motor"],
+    kilde: "https://www.lillesandmotorsenter.no/vinteropplag/",
+  },
+  {
+    navn: "Bjørnevika Bådsenter",
+    omrade: "Lillesand",
+    sted: "Høvåg (Lillesand)",
+    postnummer: "4770",
+    adresse: null,
+    nettside: "https://bbaad.no",
+    telefon: null,
+    plassering: "innendors", // syv haller
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: null,
+    tjenester: ["konservering_motor"],
+    kilde: "https://bbaad.no/batopplag/",
+  },
+  {
+    navn: "Lillesand Båtpleie AS",
+    omrade: "Lillesand",
+    sted: "Lillesand",
+    postnummer: "4790",
+    adresse: null,
+    nettside: "https://baatpleie.no",
+    telefon: null,
+    plassering: "innendors",
+    temperatur: null, // "frostfri hall" – oppgir ikke varmt/temperert
+    fuktkontroll: null,
+    maksLengde: 30, // prisliste dekker 10–30 fot
+    prisPerFot: null,
+    // Faste totalpriser per fot-lengde. Inkluderer spyling under vannlinja,
+    // kjøring av motor i ferskvann og lagring i frostfri hall.
+    prisBrackets: [
+      { maks: 10, kr: 6500 }, { maks: 11, kr: 7000 }, { maks: 12, kr: 7400 },
+      { maks: 13, kr: 7800 }, { maks: 14, kr: 8500 }, { maks: 15, kr: 9200 },
+      { maks: 16, kr: 10500 }, { maks: 17, kr: 11000 }, { maks: 18, kr: 11500 },
+      { maks: 19, kr: 12000 }, { maks: 20, kr: 13000 }, { maks: 21, kr: 14000 },
+      { maks: 22, kr: 15000 }, { maks: 23, kr: 16000 }, { maks: 24, kr: 17000 },
+      { maks: 25, kr: 18000 }, { maks: 26, kr: 19000 }, { maks: 27, kr: 20000 },
+      { maks: 28, kr: 21000 }, { maks: 29, kr: 22000 }, { maks: 30, kr: 23000 },
+    ],
+    prisModell: "total",
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Prisen inkluderer spyling, motorkjøring i ferskvann og frostfri hall. Endringer kan forekomme – kontakt for eksakt pris.",
+    tjenester: ["konservering_motor", "spyling", "vaskeplass", "bunnstoff"],
+    kilde: "https://baatpleie.no/priser/",
+  },
+  {
+    navn: "Lillesand Seilforening (Kokkenes)",
+    omrade: "Lillesand",
+    sted: "Lillesand (Kokkenes)",
+    postnummer: "4790",
+    adresse: null,
+    nettside: "https://www.lillesand-seilforening.no",
+    telefon: null,
+    plassering: "utendors",
+    temperatur: "kaldt",
+    fuktkontroll: false,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: null,
+    tjenester: [],
+    kilde: "https://www.lillesand-seilforening.no/www2/tur-og-hav/batopplag/",
+  },
+
+  // ========================= Grimstad =========================
+  {
+    navn: "Grimstad Bådsenter AS",
+    omrade: "Grimstad",
+    sted: "Grimstad (Østerhus)",
+    postnummer: "4876",
+    adresse: "Odden 9, 4876 Grimstad",
+    nettside: "https://gbaad.no/batopplag/",
+    telefon: "37 04 13 58",
+    plassering: "innendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: null,
+    tjenester: [],
+    kilde: "https://gbaad.no/batopplag/",
+  },
+  {
+    navn: "Båtgarasjer (Hasseltangen AS)",
+    omrade: "Grimstad",
+    sted: "Fevik (Grimstad)",
+    postnummer: "4870",
+    adresse: "Sømsveien 183, 4870 Fevik",
+    nettside: "https://www.batgarasjer.no",
+    telefon: "952 30 702",
+    plassering: "innendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: 50,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: null,
+    tjenester: ["spyling", "bunnstoff", "kranloft", "vaskeplass"],
+    kilde: "https://www.batgarasjer.no/",
+  },
+  {
+    navn: "Grimstad Motorbåtforening (GMF)",
+    omrade: "Grimstad",
+    sted: "Grimstad (Grømbukta)",
+    postnummer: "4877",
+    adresse: null,
+    nettside: "https://gmf.no/",
+    telefon: null,
+    plassering: "utendors",
+    temperatur: "kaldt",
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    // Faste totalpriser per lengdekategori (uteopplag). Båt over 32 fot: 300 kr/fot.
+    prisBrackets: [
+      { maks: 14, kr: 1020 },
+      { maks: 24, kr: 1440 },
+      { maks: 32, kr: 1800 },
+    ],
+    prisModell: "total",
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Medlemsforening – krever medlemskap. Båt over 32 fot: 300 kr/fot.",
+    tjenester: [],
+    kilde: "https://gmf.no/priser/",
+  },
+
+  // ========================= Arendal =========================
+  {
+    navn: "Arendal Bådsenter (Abaad)",
+    omrade: "Arendal",
+    sted: "Stoa (Arendal)",
+    postnummer: "4848",
+    adresse: "Skrubbedalsveien 2, 4848 Arendal",
+    nettside: "https://abaad.no/batopplag/",
+    telefon: "464 25 000",
+    plassering: "innendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Forsikringsgodkjente haller, reolbasert servicesystem.",
+    tjenester: ["spyling", "konservering_motor", "frostsikring_kjol"],
+    kilde: "https://abaad.no/batopplag/",
+  },
+  {
+    navn: "Arendal Båt og Motor AS",
+    omrade: "Arendal",
+    sted: "His (Arendal)",
+    postnummer: "4817",
+    adresse: "Tangen alle 44, 4817 His",
+    nettside: "https://www.arendalbatogmotor.no/batopplag/",
+    telefon: "467 04 444",
+    plassering: "innendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    // Totalpriser per lengde (inkl. høytrykksspyling, batterilading, oppstartskontroll).
+    prisBrackets: [
+      { maks: 16, kr: 6810 },
+      { maks: 17, kr: 7350 },
+      { maks: 18, kr: 7810 },
+      { maks: 19, kr: 8390 },
+      { maks: 20, kr: 8990 },
+      { maks: 21, kr: 9600 },
+      { maks: 22, kr: 10250 },
+    ],
+    prisModell: "total",
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Publisert prisliste dekker 16–22 fot. Større båter: kontakt tilbyder.",
+    tjenester: ["spyling", "batterilading"],
+    kilde: "https://www.arendalbatogmotor.no/batopplag/",
+  },
+  {
+    navn: "Sjøsenteret Arendal",
+    omrade: "Arendal",
+    sted: "Stoa (Arendal)",
+    postnummer: "4848",
+    adresse: "Stoaveien 5A, 4848 Arendal",
+    nettside: "https://www.sjosa.no/opplag/",
+    telefon: "91 00 95 45",
+    plassering: "innendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: 30,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Krever kaskoforsikring.",
+    tjenester: ["kranloft"],
+    kilde: "https://www.sjosa.no/opplag/",
+  },
+  {
+    navn: "Båthuset Arendal AS",
+    omrade: "Arendal",
+    sted: "Arendal",
+    postnummer: "4841",
+    adresse: "Bedriftsveien 18, 4841 Arendal",
+    nettside: "https://www.bathusetarendal.no/",
+    telefon: "37 03 30 00",
+    plassering: "innendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Tørr hall.",
+    tjenester: [],
+    kilde: "https://www.bathusetarendal.no/",
+  },
+
+  // ========================= Kristiansand =========================
+  {
+    navn: "Kristiansand Båt og Motor AS (KBM)",
+    omrade: "Kristiansand",
+    sted: "Kristiansand",
+    postnummer: "4639",
+    adresse: "Kystveien 310, 4639 Kristiansand",
+    nettside: "https://www.kbm.no",
+    telefon: "38 05 81 00",
+    plassering: "innendors",
+    temperatur: "varmt", // tørre, frostfrie og oppvarmede haller
+    fuktkontroll: null,
+    maksLengde: 49, // full prisliste 15–49 fot; 50+ på forespørsel
+    prisPerFot: null,
+    // Totalpriser per fot-lengde, sesong 2025/2026 (inkl. mva).
+    prisBrackets: [
+      { maks: 15, kr: 9431 }, { maks: 16, kr: 10202 }, { maks: 17, kr: 12406 },
+      { maks: 18, kr: 13438 }, { maks: 19, kr: 14336 }, { maks: 20, kr: 15368 },
+      { maks: 21, kr: 16398 }, { maks: 22, kr: 17429 }, { maks: 23, kr: 21343 },
+      { maks: 24, kr: 22638 }, { maks: 25, kr: 23937 }, { maks: 26, kr: 25365 },
+      { maks: 27, kr: 28750 }, { maks: 28, kr: 30832 }, { maks: 29, kr: 32260 },
+      { maks: 30, kr: 34474 }, { maks: 31, kr: 36169 }, { maks: 32, kr: 38516 },
+      { maks: 33, kr: 40602 }, { maks: 34, kr: 43338 }, { maks: 35, kr: 45819 },
+      { maks: 36, kr: 48298 }, { maks: 37, kr: 50909 }, { maks: 38, kr: 53523 },
+      { maks: 39, kr: 56133 }, { maks: 40, kr: 58880 }, { maks: 41, kr: 60974 },
+      { maks: 42, kr: 63718 }, { maks: 43, kr: 66597 }, { maks: 44, kr: 69475 },
+      { maks: 45, kr: 72616 }, { maks: 46, kr: 75625 }, { maks: 47, kr: 78636 },
+      { maks: 48, kr: 79956 }, { maks: 49, kr: 84924 },
+    ],
+    prisModell: "total",
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Priser for sesong 2025/2026. Båt over 49 fot: pris på forespørsel.",
+    tjenester: ["kranloft", "spyling", "bunnstoff"],
+    kilde: "https://www.kbm.no/batopplag/innelagring",
+  },
+  {
+    navn: "Randesund Båtsenter",
+    omrade: "Kristiansand",
+    sted: "Kristiansand",
+    postnummer: "4639",
+    adresse: "Dvergsnesveien 120, 4639 Kristiansand",
+    nettside: "https://www.baatsenteret.no",
+    telefon: "416 86 420",
+    plassering: "innendors",
+    temperatur: "varmt",
+    fuktkontroll: true, // oppgir avfukter + oppvarmet/isolert hall
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: null,
+    tjenester: ["kranloft", "spyling", "konservering_motor", "bunnstoff"],
+    kilde: "https://www.baatsenteret.no/opplag",
+  },
+  {
+    navn: "Kristiansand Bådsenter AS",
+    omrade: "Kristiansand",
+    sted: "Sørlandsparken (Kristiansand)",
+    postnummer: "4636",
+    adresse: "Barstølveien 3b, 4636 Kristiansand S",
+    nettside: "https://kbaad.no",
+    telefon: "40 00 69 96",
+    plassering: "innendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    // Kun endepunkter publisert (14 fot / 28 fot), fra eldre prisliste.
+    prisBrackets: [
+      { maks: 14, kr: 8500 },
+      { maks: 28, kr: 21950 },
+    ],
+    prisModell: "total",
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Prisene er fra en eldre liste (2022/2023) og kun veiledende.",
+    tjenester: ["spyling", "kranloft", "bunnstoff", "konservering_motor"],
+    kilde: "https://kbaad.no/batopplag/",
+  },
+  {
+    navn: "Bølgen Båtservice AS",
+    omrade: "Kristiansand",
+    sted: "Kristiansand",
+    postnummer: "4639",
+    adresse: "Kystveien 655, 4639 Kristiansand S",
+    nettside: "https://bolgenbat.no",
+    telefon: "482 93 937",
+    plassering: "innendors",
+    temperatur: null, // tilbyr både temperert og kald hall
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Tilbyr temperert hall, kald hall og utendørs.",
+    tjenester: ["konservering_motor", "spyling"],
+    kilde: "https://bolgenbat.no/batopplag/",
+  },
+
+  // ========================= Oslo / Oslofjorden =========================
+  {
+    navn: "Sørfonden Slipp AS",
+    omrade: "Oslo",
+    sted: "Oslo",
+    postnummer: "0198",
+    adresse: "Dalheimveien 10, 0198 Oslo",
+    nettside: "https://www.sorfondenslipp.no",
+    telefon: "22 29 56 00",
+    plassering: "utendors",
+    temperatur: "kaldt",
+    fuktkontroll: null,
+    maksLengde: 28,
+    prisPerFot: null,
+    prisBrackets: [
+      { maks: 23, kr: 375 },
+      { maks: 28, kr: 400 },
+    ],
+    prisModell: "perFot",
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Seilbåt: 455 kr/fot. I tillegg miljøavgift 400 kr.",
+    tjenester: ["spyling", "kranloft"],
+    kilde: "https://www.sorfondenslipp.no/vinteropplag-og-vinterhavn",
+  },
+  {
+    navn: "Killingen Båtservice AS",
+    omrade: "Oslo",
+    sted: "Oslo (Bygdøy)",
+    postnummer: "0287",
+    adresse: "Killingen 46, 0287 Oslo",
+    nettside: "https://www.killingenbatservice.no",
+    telefon: "46 622 622",
+    plassering: null,
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: 50,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: null,
+    tjenester: ["kranloft", "spyling"],
+    kilde: "https://www.killingenbatservice.no/services-7",
+  },
+  {
+    navn: "Oslo Seilforening",
+    omrade: "Oslo",
+    sted: "Oslo (Lille Herbern)",
+    postnummer: "0214",
+    adresse: null,
+    nettside: "https://www.osloseilforening.no",
+    telefon: "917 91 239",
+    plassering: "utendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: 27,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: null,
+    tjenester: ["kranloft"],
+    kilde: "https://www.osloseilforening.no/next/p/13825/vinteropplag",
+  },
+  {
+    navn: "Holmen Slipp AS",
+    omrade: "Oslo",
+    sted: "Asker",
+    postnummer: "",
+    adresse: null,
+    nettside: "https://www.holmenslipp.com",
+    telefon: null,
+    plassering: "innendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: 40,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Pris beregnes per m² (ute 795 kr/m², inne 1050 kr/m²) pluss vinterpresenning.",
+    tjenester: ["kranloft", "spyling"],
+    kilde: "https://www.holmenslipp.com/vinteropplag",
+  },
+  {
+    navn: "Opplag Oslo (Tofte)",
+    omrade: "Oslo",
+    sted: "Tofte",
+    postnummer: "",
+    adresse: "Tofte Strand Næringspark, Tofte",
+    nettside: "http://opplagoslo.no",
+    telefon: null,
+    plassering: "innendors",
+    temperatur: "varmt",
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: 350, // innendørs 350 kr + mva/fot (utendørs 250 kr + mva/fot)
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: true,
+    ledigePlasser: null,
+    merknad: "Utendørs 250 kr/fot. Lagring på Tofte.",
+    tjenester: ["konservering_motor"],
+    kilde: "http://opplagoslo.no/tofte/yacht.php",
+  },
+  {
+    navn: "Båtopplag Oslo (KAJ AS)",
+    omrade: "Oslo",
+    sted: "Hønefoss (henting i Oslo)",
+    postnummer: "3514",
+    adresse: "Nesmoveien 1, 3514 Hønefoss",
+    nettside: "https://batopplagoslo.no",
+    telefon: "488 55 151",
+    plassering: "innendors",
+    temperatur: "varmt",
+    fuktkontroll: null,
+    maksLengde: 28,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Pakkepris etter lengde. Lagring i Hønefoss med henting i Oslo.",
+    tjenester: ["konservering_motor", "spyling", "bunnstoff", "batterilading"],
+    kilde: "https://batopplagoslo.no",
+  },
+  {
+    navn: "Kompass Marine Services AS",
+    omrade: "Oslo",
+    sted: "Drøbak",
+    postnummer: "1446",
+    adresse: "Rogenveien 3b, 1446 Drøbak",
+    nettside: "https://www.kompassmarine.com",
+    telefon: "902 11 529",
+    plassering: "innendors",
+    temperatur: "varmt",
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Oppgir «innendørs fra 160 kr/fot».",
+    tjenester: ["konservering_motor", "spyling", "bunnstoff"],
+    kilde: "https://www.kompassmarine.com/vinteropplag/",
+  },
+
+  // ---- Flere Oslo/Oslofjord-tilbydere (lagt til 2026-08-21) ----
+  {
+    navn: "Asker Marina",
+    omrade: "Oslo",
+    sted: "Asker",
+    postnummer: "",
+    adresse: null,
+    nettside: "https://askermarina.no/meny/havna/vinteropplag",
+    telefon: null,
+    plassering: "innendors",
+    temperatur: "varmt",
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Oppvarmet båthotell (3500 m²) samt kald innendørs lagring og boblehavn ute. Priser ikke publisert (fås ved kontakt).",
+    tjenester: ["kranloft"],
+    kilde: "https://askermarina.no/meny/havna/vinteropplag",
+  },
+  {
+    navn: "Drammen Båt AS",
+    omrade: "Oslo",
+    sted: "Drammen",
+    postnummer: "3039",
+    adresse: "Svelvikveien 81, 3039 Drammen",
+    nettside: "https://www.dbat.no/tjenester/vinteropplag/",
+    telefon: null,
+    plassering: "innendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Innendørs lagringshaller. Oppvarming ikke oppgitt. Ingen priser publisert.",
+    tjenester: ["konservering_motor", "frostsikring_kjol", "bunnstoff", "batterilading", "spyling"],
+    kilde: "https://www.dbat.no/tjenester/vinteropplag/",
+  },
+  {
+    navn: "Oksenøya Marina",
+    omrade: "Oslo",
+    sted: "Fornebu",
+    postnummer: "",
+    adresse: null,
+    nettside: "https://oksenoyamarina.no/",
+    telefon: "23 88 02 09",
+    plassering: "innendors",
+    temperatur: "varmt",
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Lukket temperert båthall (innendørs) og boblehavn ute. Priser ikke publisert på hovedsiden.",
+    tjenester: [],
+    kilde: "https://oksenoyamarina.no/",
+  },
+  {
+    navn: "Amundsen Båtslipp AS",
+    omrade: "Oslo",
+    sted: "Nærsnes",
+    postnummer: "3478",
+    adresse: "Grundvikveien 1, 3478 Nærsnes",
+    nettside: "https://www.amundsenbatslipp.no/bestilling-vinteropplag",
+    telefon: "954 11 133",
+    plassering: "innendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: true,
+    ledigePlasser: null,
+    merknad: "Pris per m²: innendørs 620 kr/m², utendørs 375 kr/m² (eks. mva). Kranløft/pall/krybbe kommer i tillegg (løft 1688–3600 kr etter størrelse).",
+    tjenester: ["konservering_motor", "frostsikring_kjol", "spyling", "kranloft"],
+    kilde: "https://www.amundsenbatslipp.no/bestilling-vinteropplag",
+  },
+  {
+    navn: "Båtpleiebutikken (Heitmann & Søn)",
+    omrade: "Oslo",
+    sted: "Drøbak",
+    postnummer: "1443",
+    adresse: "Husvikholmen 8, 1443 Drøbak",
+    nettside: "https://www.baatpleiebutikken.no/pages/vinteropplag-i-drobak",
+    telefon: null,
+    plassering: "utendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: 355,
+    prisBrackets: null,
+    prisModell: "perFot",
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Utendørs på asfalt. I tillegg: opptak/utsett 408 kr/fot, vask 47 kr/fot, miljøgebyr 625 kr. Vinterstrøm (maks 500W) 8100 kr.",
+    tjenester: ["kranloft", "spyling", "frostsikring_kjol", "batterilading"],
+    kilde: "https://www.baatpleiebutikken.no/pages/vinteropplag-i-drobak",
+  },
+  {
+    navn: "Grundvik Marina",
+    omrade: "Oslo",
+    sted: "Tofte (Hurum)",
+    postnummer: "3482",
+    adresse: "Østre Strandvei 52, 3482 Tofte",
+    nettside: "https://grundvikmarina.no/batopplag",
+    telefon: "32 79 40 01",
+    plassering: "innendors",
+    temperatur: "kaldt",
+    fuktkontroll: null,
+    maksLengde: 37,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Innendørs i godt ventilerte haller (ikke oppvarmet). Maks ca. 8 tonn / 37 fot. Ingen priser publisert.",
+    tjenester: ["kranloft", "spyling", "frostsikring_kjol", "konservering_motor", "batterilading"],
+    kilde: "https://grundvikmarina.no/batopplag",
+  },
+  {
+    navn: "Bakken Motor",
+    omrade: "Oslo",
+    sted: "Drammen",
+    postnummer: "3036",
+    adresse: "Kobbervikdalen 115, 3036 Drammen",
+    nettside: "https://bakken-motor.no/verksted_single/prisliste-vinteropplag-og-service/",
+    telefon: "32 26 01 80",
+    plassering: "utendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: 1350,
+    prisBrackets: null,
+    prisModell: "perFot",
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Utendørs i reolsystem. Pris inkl. mva og inkluderer spyling, bunnstoff, polering og frostsikring (alt-i-ett). RIB rimeligere (1150–1250 kr/fot). Krymping 295 kr/fot.",
+    tjenester: ["spyling", "bunnstoff", "batterilading", "frostsikring_kjol"],
+    kilde: "https://bakken-motor.no/verksted_single/prisliste-vinteropplag-og-service/",
+  },
+  {
+    navn: "Østlandske Båtopplag",
+    omrade: "Oslo",
+    sted: "Son",
+    postnummer: "1555",
+    adresse: "Kolåsveien 30, 1555 Son",
+    nettside: "https://ostlandskebatopplag.no/",
+    telefon: "98 81 05 92",
+    plassering: "innendors",
+    temperatur: "varmt",
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Innendørs i oppvarmede lokaler, 24/7 overvåking. Gratis henting/levering i Son- og Moss-området. Ingen priser publisert.",
+    tjenester: [],
+    kilde: "https://ostlandskebatopplag.no/",
+  },
+  {
+    navn: "Asker Seilforening",
+    omrade: "Oslo",
+    sted: "Vettre (Asker)",
+    postnummer: "1392",
+    adresse: "Blakstad Bryggevei 9, 1392 Vettre",
+    nettside: "https://www.askerseil.no/vinteropplag",
+    telefon: "404 06 870",
+    plassering: "utendors",
+    temperatur: null,
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Kun for betalende medlemmer. Pris per m²: 320 kr uten mast, 340 kr med mast (2026/27). Kranløft i oktober.",
+    tjenester: ["kranloft"],
+    kilde: "https://www.askerseil.no/vinteropplag",
+  },
+  {
+    navn: "Fagerstrand Båtforening",
+    omrade: "Oslo",
+    sted: "Fagerstrand (Nesodden)",
+    postnummer: "",
+    adresse: null,
+    nettside: "https://www.havneweb.no/fabat/?mod=osv",
+    telefon: "90 94 24 80",
+    plassering: "innendors",
+    temperatur: "kaldt",
+    fuktkontroll: null,
+    maksLengde: null,
+    prisPerFot: null,
+    prisBrackets: null,
+    prisModell: null,
+    prisEksMva: false,
+    ledigePlasser: null,
+    merknad: "Kaldhall innendørs (også under tak og ute). Pris per m² (2026/27): kaldhall 727 kr, under tak 576 kr, ute 317–331 kr. Åpent for booking (ikke bare medlemmer).",
+    tjenester: ["kranloft", "spyling"],
+    kilde: "https://www.havneweb.no/fabat/?mod=osv",
+  },
+];
+
+  </script>
+  <script>
+// BåtOpplag – verifisert modelldatabase (båtmodell → lengde).
+//
+// Lar brukeren skrive båtmodellen sin i stedet for å måle lengden selv.
+// Samme datahonesty-prinsipp som resten av siden: kun modeller med
+// KILDEFØRT LOA (lengde overalt) fra produsentens egne spesifikasjoner er
+// lagt inn. Ingen tall er gjettet. Ukjente modeller faller tilbake på at
+// brukeren oppgir lengde manuelt.
+//
+// Feltforklaring:
+//   produsent  – merkenavn
+//   modell     – modellnavn (uten merket)
+//   loaMeter   – lengde overalt (LOA) i meter, ordrett fra produsentspec
+//   kilde      – URL til produsentens spesifikasjonsside
+//
+// Fot regnes ut i app.js: fot = Math.round(loaMeter × 3.28084).
+// Databasen bygges ut modell for modell, på samme måte som områdene.
+
+const BOAT_MODELS = [
+  // ============================ Nordkapp ============================
+  { produsent: "Nordkapp", modell: "Enduro 605", loaMeter: 6.08,
+    kilde: "https://www.nordkapp-boats.no/bater/enduro/enduro-605/" },
+  { produsent: "Nordkapp", modell: "Enduro 705", loaMeter: 7.13,
+    kilde: "https://www.nordkapp-boats.no/bater/enduro/enduro-705/" },
+  { produsent: "Nordkapp", modell: "Enduro 805", loaMeter: 8.05,
+    kilde: "https://www.nordkapp-boats.no/bater/enduro/enduro-805/" },
+  { produsent: "Nordkapp", modell: "Enduro 830", loaMeter: 8.30,
+    kilde: "https://www.nordkapp-boats.no/bater/enduro/enduro-830/" },
+  { produsent: "Nordkapp", modell: "Noblesse 660", loaMeter: 6.47,
+    kilde: "https://www.nordkapp-boats.no/bater/noblesse/noblesse-660/" },
+  { produsent: "Nordkapp", modell: "Noblesse 720", loaMeter: 7.14,
+    kilde: "https://www.nordkapp-boats.no/bater/noblesse/noblesse-720/" },
+  { produsent: "Nordkapp", modell: "Noblesse 830", loaMeter: 8.30,
+    kilde: "https://www.nordkapp-boats.no/bater/noblesse/noblesse-830/" },
+
+  // =========================== Askeladden ===========================
+  { produsent: "Askeladden", modell: "C61 Bow Rider", loaMeter: 6.10,
+    kilde: "https://www.askeladden.no/en/models/askeladden-c61-bow-rider/" },
+  { produsent: "Askeladden", modell: "C65 Cruiser", loaMeter: 6.45,
+    kilde: "https://www.askeladden.no/modeller/askeladden-c65-cruiser/" },
+  { produsent: "Askeladden", modell: "C70 Cruiser", loaMeter: 6.99,
+    kilde: "https://www.askeladden.no/en/models/askeladden-c70-cruiser/" },
+
+  // ============================= Yamarin ============================
+  // Kilde: produsentens egne modellsider (yamarin.com).
+  { produsent: "Yamarin", modell: "50 BR", loaMeter: 4.86,
+    kilde: "https://yamarin.com/en/models/yamarin-50-br" },
+  { produsent: "Yamarin", modell: "59 BR", loaMeter: 5.95,
+    kilde: "https://yamarin.com/en/models/yamarin-59-br" },
+  { produsent: "Yamarin", modell: "60 DC", loaMeter: 6.06,
+    kilde: "https://yamarin.com/en/models/yamarin-60-dc" },
+  { produsent: "Yamarin", modell: "63 DC", loaMeter: 6.35,
+    kilde: "https://yamarin.com/en/models/yamarin-63-dc" },
+  { produsent: "Yamarin", modell: "67 DC", loaMeter: 6.76,
+    kilde: "https://yamarin.com/en/models/yamarin-67-dc" },
+
+  // ============================ Skibsplast ==========================
+  // Skibsplast er ikke lenger aktiv produsent; skibsplast.no omdirigerer til
+  // forhandlerarkiv. LOA hentet fra Din-Båt AS / BestMarin Tønsberg (verifisert).
+  { produsent: "Skibsplast", modell: "555 HT", loaMeter: 5.55,
+    kilde: "https://www.xn--din-bt-mua.com/skibsplast-555-ht" },
+  { produsent: "Skibsplast", modell: "605", loaMeter: 6.05,
+    kilde: "https://www.xn--din-bt-mua.com/skibsplast-605" },
+  { produsent: "Skibsplast", modell: "655", loaMeter: 6.50,
+    kilde: "https://www.xn--din-bt-mua.com/skibsplast-655" },
+  { produsent: "Skibsplast", modell: "660", loaMeter: 6.50,
+    kilde: "https://www.xn--din-bt-mua.com/skibsplast-660" },
+
+  // ============================== Sting =============================
+  // Kilde: OceanDrive AS (oceandriveboats.no), norsk Sting-distributør.
+  { produsent: "Sting", modell: "Pro 535 Open", loaMeter: 5.43,
+    kilde: "https://oceandriveboats.no/bater-pa-hovedsiden/pro-535-open/" },
+  { produsent: "Sting", modell: "Pro 600 HT", loaMeter: 6.11,
+    kilde: "https://oceandriveboats.no/sting/pro/sting-pro-600-ht/" },
+  { produsent: "Sting", modell: "Pro 600 Open", loaMeter: 6.11,
+    kilde: "https://oceandriveboats.no/sting/pro/sting-pro-600-open/" },
+  { produsent: "Sting", modell: "Pro 725 Open", loaMeter: 7.23,
+    kilde: "https://oceandriveboats.no/bater-pa-hovedsiden/sting-pro-725-open/" },
+  { produsent: "Sting", modell: "Pro 725 Cabin", loaMeter: 7.23,
+    kilde: "https://oceandriveboats.no/sting/pro/sting-pro-725-cabin/" },
+
+  // ============================== Ibiza =============================
+  // Kilde: produsentens egne modellsider (ibizaboats.no).
+  { produsent: "Ibiza", modell: "690 Touring", loaMeter: 6.85,
+    kilde: "https://www.ibizaboats.no/en/690-touring/" },
+  { produsent: "Ibiza", modell: "770 Touring", loaMeter: 7.70,
+    kilde: "https://www.ibizaboats.no/en/770-touring/" },
+  { produsent: "Ibiza", modell: "811 Touring", loaMeter: 8.11,
+    kilde: "https://www.ibizaboats.no/en/811-touring/" },
+  { produsent: "Ibiza", modell: "911 Touring", loaMeter: 9.11,
+    kilde: "https://www.ibizaboats.no/en/models/911-touring/" },
+
+  // ============================== Buster ============================
+  // Kilde: produsentens egne modellsider (buster.fi).
+  { produsent: "Buster", modell: "M1", loaMeter: 4.86,
+    kilde: "https://www.buster.fi/en/models/buster-m1" },
+  { produsent: "Buster", modell: "X", loaMeter: 5.35,
+    kilde: "https://www.buster.fi/en/models/buster-x" },
+  { produsent: "Buster", modell: "XL", loaMeter: 6.05,
+    kilde: "https://www.buster.fi/en/models/buster-xl" },
+  { produsent: "Buster", modell: "XXL", loaMeter: 6.25,
+    kilde: "https://www.buster.fi/en/models/buster-xxl" },
+  { produsent: "Buster", modell: "Magnum", loaMeter: 7.20,
+    kilde: "https://www.buster.fi/en/models/buster-magnum-2022" },
+
+  // ============================== Uttern ============================
+  // D57: offisiell Uttern-forhandler (Borås Marin, verifisert).
+  // S57/D62: Utterns egne produktdatablad (uttern.com).
+  { produsent: "Uttern", modell: "D57", loaMeter: 5.73,
+    kilde: "https://borasmarin.se/butik/batar/utternbatar/uttern-d57/" },
+  { produsent: "Uttern", modell: "S57", loaMeter: 5.73,
+    kilde: "https://www.uttern.com/media/productsheet/s57%20product%20sheet%20int-en.pdf" },
+  { produsent: "Uttern", modell: "D62", loaMeter: 6.33,
+    kilde: "https://www.uttern.com/media/387189/products-sheet_uttern_d62_en.pdf" },
+];
+
+  </script>
+  <script>
+// BåtOpplag – skjemalogikk, filtrering, prisestimat og tjenesteanbefaling.
+// Krever at data.js er lastet før denne (STORAGE_SITES er global).
+
+// Lesbare navn for tjenestenøklene brukt i data.js.
+const SERVICE_LABELS = {
+  konservering_motor: "Vinterkonservering av motor",
+  frostsikring_kjol: "Frostsikring av kjølesystem",
+  spyling: "Spyling av skrog",
+  bunnstoff: "Bunnstoffbehandling",
+  kranloft: "Kranløft opp/ned",
+  vaskeplass: "Høytrykksvask",
+  batterilading: "Batterivedlikehold/lading",
+};
+
+// Lesbare navn for plassering og temperatur.
+const PLASSERING_LABELS = { innendors: "Innendørs", utendors: "Utendørs" };
+const TEMPERATUR_LABELS = { varmt: "Varmt", kaldt: "Kaldt" };
+
+const nf = new Intl.NumberFormat("nb-NO");
+const mf = new Intl.NumberFormat("nb-NO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// ---- Båtmodell → lengde ----------------------------------------------
+// Krever at models.js er lastet (BOAT_MODELS er global).
+
+const M_TIL_FOT = 3.28084;
+
+function fotFraMeter(m) {
+  return Math.round(m * M_TIL_FOT);
+}
+
+function fulltModellNavn(m) {
+  return `${m.produsent} ${m.modell}`;
+}
+
+// Deler modelltekst i tokens (småbokstaver, kun bokstaver/tall).
+function modellTokens(tekst) {
+  return tekst
+    .toLowerCase()
+    .replace(/[^0-9a-zæøå]+/gi, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+/**
+ * Finner en modell fra fritekst. Rekkefølge-uavhengig token-matching:
+ *   1) Full match: alle tokens i "produsent modell" finnes i inputen
+ *      (håndterer f.eks. "Nordkapp 605 Enduro" like godt som kanonisk navn).
+ *   2) Fallback: alle tokens UTEN merket finnes, og gir nøyaktig ett treff
+ *      (lar brukeren droppe merkenavnet, f.eks. bare "Enduro 605").
+ * Returnerer modell-objektet eller null.
+ */
+function finnModell(tekst) {
+  const input = new Set(modellTokens(tekst));
+  if (!input.size) return null;
+
+  const subset = (tokens) => tokens.length > 0 && tokens.every((t) => input.has(t));
+
+  const fulle = BOAT_MODELS.filter((m) => subset(modellTokens(fulltModellNavn(m))));
+  if (fulle.length === 1) return fulle[0];
+  if (fulle.length > 1) {
+    // Flere treff – velg mest spesifikke (flest tokens).
+    fulle.sort(
+      (a, b) => modellTokens(fulltModellNavn(b)).length - modellTokens(fulltModellNavn(a)).length
+    );
+    return fulle[0];
+  }
+
+  const utenMerke = BOAT_MODELS.filter((m) => subset(modellTokens(m.modell)));
+  return utenMerke.length === 1 ? utenMerke[0] : null;
+}
+
+/**
+ * Anbefaler tjenester ut fra motorplassering og takt.
+ * Returnerer en liste av tjenestenøkler (matcher SERVICE_LABELS/data.js).
+ */
+function anbefalteTjenester(motorplassering, takt) {
+  const anbefalt = new Set(["konservering_motor"]);
+
+  if (motorplassering === "innenbords") {
+    // Innenbords har typisk ferskvann-/kjølesystem som må frostsikres.
+    anbefalt.add("frostsikring_kjol");
+    anbefalt.add("batterilading");
+  } else {
+    // Utenbords bør spyles og vippes; ofte lettere å ta av.
+    anbefalt.add("spyling");
+  }
+
+  if (takt === "2") {
+    // 2-takts (ofte eldre utenbords) – ekstra fokus på konservering/spyling.
+    anbefalt.add("spyling");
+  }
+
+  return [...anbefalt];
+}
+
+/**
+ * Grov nærhet mellom to postnummer basert på tallverdi.
+ * Ikke geografisk korrekt, men gir en konsistent sortering for demoen.
+ */
+function postnummerAvstand(a, b) {
+  const na = parseInt(a, 10);
+  const nb = parseInt(b, 10);
+  // Ukjent postnummer sorteres bakerst.
+  if (!Number.isFinite(na) || !Number.isFinite(nb)) return Number.POSITIVE_INFINITY;
+  return Math.abs(na - nb);
+}
+
+/**
+ * Beregner prisestimat for en båtlengde.
+ * Returnerer { perFot, total, eksMva } eller null hvis pris ikke er oppgitt.
+ * prisBrackets (lengdebasert per-fot-pris) overstyrer flat prisPerFot.
+ */
+function beregnPris(site, lengde) {
+  if (Array.isArray(site.prisBrackets)) {
+    const b = site.prisBrackets.find((x) => lengde <= x.maks);
+    if (!b) return null; // over største intervall → "pris på forespørsel"
+    if (site.prisModell === "total") {
+      // kr er TOTAL sesongpris for båter opp til `maks` fot.
+      return { perFot: Math.round(b.kr / lengde), total: b.kr, eksMva: !!site.prisEksMva };
+    }
+    // Standard: kr er pris PER FOT for intervallet.
+    return { perFot: b.kr, total: b.kr * lengde, eksMva: !!site.prisEksMva };
+  }
+  if (site.prisPerFot != null) {
+    return { perFot: site.prisPerFot, total: site.prisPerFot * lengde, eksMva: !!site.prisEksMva };
+  }
+  return null;
+}
+
+/**
+ * Samler per-fot-priser fra alle steder med KJENT pris, for en gitt lengde.
+ * Brukes som markedsgrunnlag for veiledende maks­pris på steder uten pris.
+ * Returnerer [{ plassering, temperatur, perFot }].
+ */
+function prisSamples(lengde) {
+  const ut = [];
+  for (const s of STORAGE_SITES) {
+    const p = beregnPris(s, lengde);
+    if (p) ut.push({ plassering: s.plassering, temperatur: s.temperatur, perFot: p.perFot });
+  }
+  return ut;
+}
+
+/**
+ * Veiledende maks­pris for et sted UTEN publisert pris, basert på lignende
+ * opplag med kjent pris. Prøver mest spesifikke kategori først:
+ *   samme plassering + samme temperatur → samme plassering → (grovt) alle.
+ * Returnerer { perFotMaks, perFotMin, totalMaks, antall, grov } eller null.
+ */
+function veiledendePris(site, lengde, samples) {
+  if (!samples.length) return null;
+
+  let kandidater = null;
+  let grov = false;
+
+  if (site.plassering != null) {
+    const sammePlass = samples.filter((x) => x.plassering === site.plassering);
+    if (sammePlass.length) {
+      kandidater = sammePlass;
+      if (site.temperatur != null) {
+        const sammeTemp = sammePlass.filter((x) => x.temperatur === site.temperatur);
+        if (sammeTemp.length) kandidater = sammeTemp;
+      }
+    } else {
+      // Ingen prisdata for denne plasseringen ennå – vi anslår ikke på tvers.
+      return null;
+    }
+  } else {
+    // Ukjent plassering: kun et svært grovt anslag basert på alt vi har.
+    kandidater = samples;
+    grov = true;
+  }
+
+  const perFots = kandidater.map((x) => x.perFot);
+  const perFotMaks = Math.max(...perFots);
+  const perFotMin = Math.min(...perFots);
+  const perFotSnitt = Math.round(perFots.reduce((a, b) => a + b, 0) / perFots.length);
+  return {
+    perFotSnitt,
+    perFotMaks,
+    perFotMin,
+    totalSnitt: perFotSnitt * lengde,
+    antall: kandidater.length,
+    grov,
+  };
+}
+
+/**
+ * Filtrerer og sorterer opplagssteder for et gitt søk.
+ *
+ * Håndtering av `null` ("ukjent"):
+ *   - maksLengde null  → tas med (kan ikke utelukkes på lengde)
+ *   - plassering/temperatur: tom avhukingsliste = ingen filtrering.
+ *     Er filteret aktivt, kreves en KJENT verdi som matcher – ukjent utelukkes.
+ *   - fuktkontroll krevd → kun steder med bekreftet fuktkontroll (true).
+ *
+ * Returnerer { treff, skjultUkjent } der skjultUkjent er antall steder som
+ * ellers ville passet, men ble utelukket kun fordi et aktivt kriterium er ukjent.
+ */
+// Grupperer områder i større regioner. Et søk viser kun tilbydere i
+// regionen som ligger nærmest – slik at f.eks. et Oslo-søk aldri drar med
+// Sørlandet. Ukjente områder blir sin egen region (trygt standardvalg).
+const OMRADE_REGION = {
+  Lillesand: "Sørlandet",
+  Grimstad: "Sørlandet",
+  Arendal: "Sørlandet",
+  Kristiansand: "Sørlandet",
+  Oslo: "Oslofjorden",
+};
+
+function regionFor(omrade) {
+  return OMRADE_REGION[omrade] || omrade;
+}
+
+// Postnummer-avstand som regnes som "langt unna nærmeste dekning".
+const LANGT_UNNA = 1500;
+
+function finnOpplag(sok) {
+  // 1. Finn nærmeste region ut fra postnummer (uavhengig av øvrige kriterier).
+  let naermest = null;
+  for (const s of STORAGE_SITES) {
+    const d = postnummerAvstand(s.postnummer, sok.postnummer);
+    if (naermest === null || d < naermest.avstand) {
+      naermest = { avstand: d, region: regionFor(s.omrade) };
+    }
+  }
+  const region = naermest ? naermest.region : null;
+  const langtUnna = naermest ? naermest.avstand > LANGT_UNNA : false;
+
+  // 2. Bygg treff kun blant tilbydere i den nærmeste regionen.
+  const passerLengde = STORAGE_SITES.filter(
+    (s) => regionFor(s.omrade) === region && (s.maksLengde == null || s.maksLengde >= sok.lengde)
+  );
+
+  const treff = [];
+  let skjultUkjent = 0;
+
+  for (const s of passerLengde) {
+    const plassAktiv = sok.plassering.length > 0;
+    const tempAktiv = sok.temperatur.length > 0;
+    const fuktAktiv = !!sok.fuktkontroll;
+
+    const plassOk = !plassAktiv || (s.plassering != null && sok.plassering.includes(s.plassering));
+    const tempOk = !tempAktiv || (s.temperatur != null && sok.temperatur.includes(s.temperatur));
+    const fuktOk = !fuktAktiv || s.fuktkontroll === true;
+
+    if (plassOk && tempOk && fuktOk) {
+      treff.push({
+        site: s,
+        avstand: postnummerAvstand(s.postnummer, sok.postnummer),
+        pris: beregnPris(s, sok.lengde),
+      });
+      continue;
+    }
+
+    // Hard uenighet = kjent verdi som ikke matcher (da er stedet reelt uaktuelt).
+    const hardPlass = plassAktiv && s.plassering != null && !sok.plassering.includes(s.plassering);
+    const hardTemp = tempAktiv && s.temperatur != null && !sok.temperatur.includes(s.temperatur);
+    const hardFukt = fuktAktiv && s.fuktkontroll === false;
+
+    // Ukjent-blokkering = aktivt kriterium der stedet mangler opplysning.
+    const ukjentBlokk =
+      (plassAktiv && s.plassering == null) ||
+      (tempAktiv && s.temperatur == null) ||
+      (fuktAktiv && s.fuktkontroll == null);
+
+    if (ukjentBlokk && !(hardPlass || hardTemp || hardFukt)) skjultUkjent++;
+  }
+
+  treff.sort((a, b) => a.avstand - b.avstand);
+  return { treff, skjultUkjent, region, langtUnna };
+}
+
+// ---- Validering -------------------------------------------------------
+
+function visFeil(id, melding) {
+  const el = document.getElementById("err-" + id);
+  if (el) {
+    el.textContent = melding;
+    el.hidden = false;
+  }
+  const input = document.getElementById(id);
+  if (input) input.classList.add("invalid");
+}
+
+function nullstillFeil() {
+  document.querySelectorAll(".error").forEach((e) => (e.hidden = true));
+  document.querySelectorAll(".invalid").forEach((e) => e.classList.remove("invalid"));
+}
+
+function lesSkjema() {
+  const postnummer = document.getElementById("postnummer").value.trim();
+  const lengde = document.getElementById("lengde").value.trim();
+  const motorplassering = document.querySelector('input[name="motorplassering"]:checked');
+  const takt = document.querySelector('input[name="takt"]:checked');
+  const avhuket = (name) =>
+    [...document.querySelectorAll('input[name="' + name + '"]:checked')].map((el) => el.value);
+
+  return {
+    postnummer,
+    lengde,
+    modell: document.getElementById("modell").value.trim(),
+    motorplassering: motorplassering ? motorplassering.value : null,
+    takt: takt ? takt.value : null,
+    plassering: avhuket("plassering"),
+    temperatur: avhuket("temperatur"),
+    fuktkontroll: document.querySelector('input[name="fuktkontroll"]').checked,
+  };
+}
+
+/**
+ * Validerer skjemaet. `modellInfo` er en gjenkjent modell (eller null).
+ * Lengde kreves kun når den ikke allerede er avledet fra en modell.
+ */
+function valider(data, modellInfo) {
+  let ok = true;
+
+  if (!/^\d{4}$/.test(data.postnummer)) {
+    visFeil("postnummer", "Skriv inn et gyldig 4-sifret postnummer.");
+    ok = false;
+  }
+
+  const lengdeTall = Number(data.lengde);
+  const gyldigLengde = data.lengde && Number.isFinite(lengdeTall) && lengdeTall > 0;
+
+  if (modellInfo) {
+    // Lengde kommer fra modellen – ingen krav til lengdefeltet.
+  } else if (data.modell) {
+    // Modell skrevet, men ikke gjenkjent. Godta hvis lengde er oppgitt manuelt.
+    if (!gyldigLengde) {
+      visFeil(
+        "modell",
+        "Fant ikke modellen. Velg fra listen, sjekk stavemåte, eller oppgi lengde i fot."
+      );
+      ok = false;
+    } else if (lengdeTall > 120) {
+      visFeil("lengde", "Lengden virker urimelig stor. Sjekk verdien.");
+      ok = false;
+    }
+  } else {
+    // Ingen modell – lengde er påkrevd.
+    if (!gyldigLengde) {
+      visFeil("lengde", "Skriv inn en gyldig båtlengde i fot, eller velg en modell.");
+      ok = false;
+    } else if (lengdeTall > 120) {
+      visFeil("lengde", "Lengden virker urimelig stor. Sjekk verdien.");
+      ok = false;
+    }
+  }
+
+  if (!data.motorplassering) {
+    visFeil("motorplassering", "Velg innenbords eller utenbords.");
+    ok = false;
+  }
+
+  if (!data.takt) {
+    visFeil("takt", "Velg 2- eller 4-takts motor.");
+    ok = false;
+  }
+
+  return ok;
+}
+
+// ---- Rendering --------------------------------------------------------
+
+function tjenesteChips(site, anbefalt) {
+  const anbefaltSet = new Set(anbefalt);
+  return site.tjenester
+    .map((key) => {
+      const label = SERVICE_LABELS[key] || key;
+      const match = anbefaltSet.has(key) ? " match" : "";
+      return `<span class="chip${match}">${label}</span>`;
+    })
+    .join("");
+}
+
+// Verdi eller «ikke oppgitt»-markør for ukjente felter.
+const UKJENT = `<span class="ukjent">ikke oppgitt</span>`;
+
+function badges(site) {
+  const b = [];
+  if (site.plassering) {
+    b.push(`<span class="badge ${site.plassering}">${PLASSERING_LABELS[site.plassering]}</span>`);
+  }
+  if (site.temperatur) {
+    b.push(`<span class="badge temp-${site.temperatur}">${TEMPERATUR_LABELS[site.temperatur]}</span>`);
+  }
+  if (site.fuktkontroll === true) b.push(`<span class="badge fukt">Fuktkontroll</span>`);
+  return b.join("");
+}
+
+function prisBlokk(pris, lengde, veiledende) {
+  // Tilbyderens egen, publiserte pris.
+  if (pris) {
+    const mva = pris.eksMva ? " eks. mva" : "";
+    return `
+      <div class="price">
+        <span class="amount">${nf.format(pris.total)} kr${mva ? "*" : ""}</span>
+        <span class="per">est. for sesongen (${nf.format(pris.perFot)} kr/fot × ${lengde} fot${mva})</span>
+      </div>`;
+  }
+
+  // Ingen publisert pris – vis veiledende snitt basert på lignende opplag.
+  if (veiledende) {
+    const range =
+      veiledende.perFotMin !== veiledende.perFotMaks
+        ? ` (${nf.format(veiledende.perFotMin)}–${nf.format(veiledende.perFotMaks)} kr/fot i lignende opplag)`
+        : "";
+    const grovTekst = veiledende.grov ? " Svært grovt anslag (ukjent innendørs/utendørs)." : "";
+    return `
+      <div class="price veiledende">
+        <span class="label">Veiledende snitt</span>
+        <span class="amount">~${nf.format(veiledende.totalSnitt)} kr</span>
+        <span class="per">~${nf.format(veiledende.perFotSnitt)} kr/fot × ${lengde} fot${range}</span>
+        <span class="disclaimer">Snitt av ${veiledende.antall} opplag med kjent pris – ikke tilbyderens egen pris.${grovTekst}</span>
+      </div>`;
+  }
+
+  return `<div class="price"><span class="kontakt">Pris ikke oppgitt – kontakt tilbyder</span></div>`;
+}
+
+function kontaktBlokk(site) {
+  const deler = [];
+  if (site.adresse) deler.push(site.adresse);
+  if (site.telefon) deler.push(`Tlf: ${site.telefon}`);
+  const linjer = [];
+  if (deler.length) linjer.push(`<span>${deler.join(" · ")}</span>`);
+  const lenker = [];
+  if (site.nettside) {
+    lenker.push(`<a href="${site.nettside}" target="_blank" rel="noopener">Nettside ↗</a>`);
+  }
+  if (site.kilde) {
+    lenker.push(`<a href="${site.kilde}" target="_blank" rel="noopener" class="kilde">Kilde ↗</a>`);
+  }
+  if (lenker.length) linjer.push(`<span class="lenker">${lenker.join("")}</span>`);
+  return linjer.length ? `<div class="kontakt-rad">${linjer.join("")}</div>` : "";
+}
+
+function renderResultat(sok) {
+  const results = document.getElementById("results");
+  const anbefalt = anbefalteTjenester(sok.motorplassering, sok.takt);
+  const { treff, skjultUkjent, region, langtUnna } = finnOpplag(sok);
+
+  const langtUnnaNote = langtUnna
+    ? `<p class="note-ukjent">Vi har foreløpig ingen opplag i ditt nærområde. `
+      + `Nærmeste region vi dekker er <strong>${region}</strong> – vist under.</p>`
+    : "";
+
+  const anbefaltHtml = `
+    <div class="reco">
+      <h3>Anbefalte tjenester for din motor</h3>
+      <p>Basert på ${sok.motorplassering} ${sok.takt}-takts motor:</p>
+      <ul>
+        ${anbefalt.map((k) => `<li>${SERVICE_LABELS[k]}</li>`).join("")}
+      </ul>
+    </div>`;
+
+  const modellNote = sok.modellInfo
+    ? `<p class="modell-funn">Lengde beregnet fra <strong>${fulltModellNavn(sok.modellInfo)}</strong>: `
+      + `${sok.lengde} fot (${mf.format(sok.modellInfo.loaMeter)} m LOA · `
+      + `<a href="${sok.modellInfo.kilde}" target="_blank" rel="noopener">kilde ↗</a>).</p>`
+    : "";
+
+  const ukjentNote = skjultUkjent
+    ? `<p class="note-ukjent">${skjultUkjent} tilbyder${skjultUkjent === 1 ? "" : "e"} i området er skjult fordi de ikke oppgir ett eller flere av kriteriene du huket av.</p>`
+    : "";
+
+  if (treff.length === 0) {
+    results.innerHTML =
+      modellNote +
+      langtUnnaNote +
+      anbefaltHtml +
+      `<div class="empty">
+        <strong>Ingen opplagssteder passer akkurat nå</strong>
+        Vi fant ingen plasser i ${region || "ditt område"} for en båt på ${sok.lengde} fot med ønskene dine.
+        Prøv gjerne en mindre lengde, færre avhukinger eller et annet område.
+      </div>` +
+      ukjentNote;
+    results.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+
+  const samples = prisSamples(sok.lengde);
+
+  const kort = treff
+    .map(({ site, pris }) => {
+      const veiledende = pris ? null : veiledendePris(site, sok.lengde, samples);
+      return `
+      <article class="site">
+        <div class="site-top">
+          <div>
+            <h3>${site.navn}</h3>
+            <p class="place">${site.sted}${site.postnummer ? " · " + site.postnummer : ""}</p>
+          </div>
+          <div class="badges">${badges(site)}</div>
+        </div>
+
+        ${prisBlokk(pris, sok.lengde, veiledende)}
+
+        <div class="meta">
+          <span>Maks lengde: <strong>${site.maksLengde != null ? site.maksLengde + " fot" : UKJENT}</strong></span>
+          <span>Ledige plasser: <strong>${site.ledigePlasser != null ? site.ledigePlasser : UKJENT}</strong></span>
+        </div>
+
+        ${site.merknad ? `<p class="merknad">ℹ️ ${site.merknad}</p>` : ""}
+        ${site.tjenester.length ? `<div class="chips">${tjenesteChips(site, anbefalt)}</div>` : ""}
+        ${kontaktBlokk(site)}
+      </article>`;
+    })
+    .join("");
+
+  const eksMvaNote = treff.some(({ pris }) => pris && pris.eksMva)
+    ? `<p class="note-mva">* Prisen er oppgitt eks. mva hos tilbyderen.</p>`
+    : "";
+
+  results.innerHTML =
+    `<div class="results-head">
+       <h2>${treff.length} opplagsplass${treff.length === 1 ? "" : "er"} i ${region}</h2>
+       <p>Sortert etter nærhet til postnummer ${sok.postnummer}. Anbefalte tjenester er uthevet med ✓.</p>
+     </div>` +
+    modellNote +
+    langtUnnaNote +
+    ukjentNote +
+    anbefaltHtml +
+    kort +
+    eksMvaNote;
+
+  results.querySelector(".results-head").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// ---- Oppstart ---------------------------------------------------------
+
+// Live-tilbakemelding under feltet når en modell er gjenkjent.
+function oppdaterModellFunn() {
+  const felt = document.getElementById("modell");
+  const boks = document.getElementById("modell-funn");
+  const lengdeInput = document.getElementById("lengde");
+  const tekst = felt.value.trim();
+
+  if (!tekst) {
+    boks.hidden = true;
+    return;
+  }
+
+  const funn = finnModell(tekst);
+  if (funn) {
+    const fot = fotFraMeter(funn.loaMeter);
+    boks.innerHTML =
+      `<strong>${fulltModellNavn(funn)}</strong> ≈ ${fot} fot ` +
+      `(${mf.format(funn.loaMeter)} m LOA · <a href="${funn.kilde}" target="_blank" rel="noopener">kilde ↗</a>)`;
+    boks.hidden = false;
+    lengdeInput.value = fot; // vis avledet lengde
+    document.getElementById("err-modell").hidden = true;
+    felt.classList.remove("invalid");
+  } else {
+    boks.hidden = true;
+  }
+}
+
+/**
+ * Forslag til nedtrekkslisten. Mer lempelig enn finnModell: hvert skrevne
+ * token må være en forstavelse i modellnavnet (gir god inkrementell filtrering).
+ * Tom tekst → hele listen (vises ved fokus).
+ */
+function modellForslag(tekst, maks = 8) {
+  const q = modellTokens(tekst);
+  let treff;
+  if (!q.length) {
+    treff = BOAT_MODELS.slice();
+  } else {
+    treff = BOAT_MODELS.filter((m) => {
+      const navnTok = modellTokens(fulltModellNavn(m));
+      return q.every((qt) => navnTok.some((nt) => nt.startsWith(qt)));
+    });
+  }
+  const lav = tekst.toLowerCase().trim();
+  treff.sort((a, b) => {
+    const as = fulltModellNavn(a).toLowerCase().startsWith(lav) ? 0 : 1;
+    const bs = fulltModellNavn(b).toLowerCase().startsWith(lav) ? 0 : 1;
+    if (as !== bs) return as - bs;
+    return fulltModellNavn(a).localeCompare(fulltModellNavn(b), "nb");
+  });
+  return treff.slice(0, maks);
+}
+
+// Styrt autocomplete-combobox for båtmodell.
+(function initModellCombo() {
+  const felt = document.getElementById("modell");
+  const liste = document.getElementById("modell-dropdown");
+  if (!felt || !liste) return;
+
+  let forslag = [];
+  let aktiv = -1;
+
+  function lukk() {
+    liste.hidden = true;
+    liste.innerHTML = "";
+    aktiv = -1;
+    felt.setAttribute("aria-expanded", "false");
+  }
+
+  function velg(m) {
+    felt.value = fulltModellNavn(m);
+    lukk();
+    oppdaterModellFunn();
+  }
+
+  function tegn() {
+    if (!forslag.length) {
+      liste.innerHTML = `<li class="tom">Ingen kjente modeller – oppgi lengde i fot i stedet.</li>`;
+      liste.hidden = false;
+      felt.setAttribute("aria-expanded", "true");
+      return;
+    }
+    liste.innerHTML = forslag
+      .map((m, i) => {
+        const fot = fotFraMeter(m.loaMeter);
+        return (
+          `<li role="option" data-i="${i}" class="${i === aktiv ? "active" : ""}">` +
+          `<span class="navn">${fulltModellNavn(m)}</span>` +
+          `<span class="fot">≈ ${fot} fot</span></li>`
+        );
+      })
+      .join("");
+    liste.hidden = false;
+    felt.setAttribute("aria-expanded", "true");
+  }
+
+  function oppdater() {
+    forslag = modellForslag(felt.value);
+    aktiv = -1;
+    tegn();
+  }
+
+  felt.addEventListener("input", () => {
+    oppdater();
+    oppdaterModellFunn();
+  });
+  felt.addEventListener("focus", oppdater);
+  felt.addEventListener("keydown", (e) => {
+    if (liste.hidden && e.key === "ArrowDown") {
+      oppdater();
+      return;
+    }
+    if (liste.hidden) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      aktiv = Math.min(aktiv + 1, forslag.length - 1);
+      tegn();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      aktiv = Math.max(aktiv - 1, 0);
+      tegn();
+    } else if (e.key === "Enter") {
+      if (aktiv >= 0 && aktiv < forslag.length) {
+        e.preventDefault();
+        velg(forslag[aktiv]);
+      }
+    } else if (e.key === "Escape") {
+      lukk();
+    }
+  });
+  // mousedown (ikke click) slik at valget skjer før blur lukker listen.
+  liste.addEventListener("mousedown", (e) => {
+    const li = e.target.closest("li[data-i]");
+    if (!li) return;
+    e.preventDefault();
+    velg(forslag[Number(li.dataset.i)]);
+  });
+  felt.addEventListener("blur", () => setTimeout(lukk, 120));
+})();
+
+document.getElementById("searchForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  nullstillFeil();
+
+  const data = lesSkjema();
+
+  // Løs opp lengde: en gjenkjent modell vinner, ellers det manuelle feltet.
+  const modellInfo = data.modell ? finnModell(data.modell) : null;
+  if (!valider(data, modellInfo)) return;
+
+  const lengde = modellInfo ? fotFraMeter(modellInfo.loaMeter) : Number(data.lengde);
+
+  renderResultat({
+    postnummer: data.postnummer,
+    lengde,
+    modellInfo,
+    motorplassering: data.motorplassering,
+    takt: data.takt,
+    plassering: data.plassering,
+    temperatur: data.temperatur,
+    fuktkontroll: data.fuktkontroll,
+  });
+});
+
+  </script>
+</body>
+</html>

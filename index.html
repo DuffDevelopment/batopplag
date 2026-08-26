@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BåtOpplag – Finn vinteropplag i ditt område</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <span class="logo">⚓ BåtOpplag</span>
+      <span class="tagline">Finn vinteropplag i ditt område</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>Sikkert vinteropplag for båten din</h1>
+      <p>Fyll inn detaljene om båten din, så finner vi opplagsplasser i nærheten som passer.</p>
+      <p class="coverage">Ekte tilbydere – databasen bygges ut område for område. Dekker nå: <strong>Lillesand, Grimstad, Arendal, Kristiansand og Oslo</strong>.</p>
+    </section>
+
+    <section class="card form-card">
+      <form id="searchForm" novalidate>
+        <div class="field">
+          <label for="postnummer">Postnummer eller sted</label>
+          <input
+            type="text"
+            id="postnummer"
+            name="postnummer"
+            inputmode="numeric"
+            placeholder="F.eks. 0250"
+            autocomplete="postal-code"
+          />
+          <small class="hint">4-sifret postnummer</small>
+          <p class="error" id="err-postnummer" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="modell">Båtmodell <span class="valgfri">(valgfritt)</span></label>
+          <div class="combo">
+            <input
+              type="text"
+              id="modell"
+              name="modell"
+              placeholder="F.eks. Nordkapp Enduro 605"
+              autocomplete="off"
+              role="combobox"
+              aria-expanded="false"
+              aria-autocomplete="list"
+              aria-controls="modell-dropdown"
+            />
+            <ul id="modell-dropdown" class="modell-dropdown" role="listbox" hidden></ul>
+          </div>
+          <small class="hint">Skriv modellen din, så finner vi lengden – eller oppgi lengde i fot nedenfor.</small>
+          <p class="modell-funn" id="modell-funn" hidden></p>
+          <p class="error" id="err-modell" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="lengde">Båtlengde (fot)</label>
+          <input
+            type="number"
+            id="lengde"
+            name="lengde"
+            min="1"
+            max="120"
+            step="1"
+            placeholder="F.eks. 27"
+          />
+          <small class="hint">Fylles ut automatisk hvis modellen gjenkjennes.</small>
+          <p class="error" id="err-lengde" hidden></p>
+        </div>
+
+        <fieldset class="field">
+          <legend>Motorplassering</legend>
+          <div class="options">
+            <label class="radio">
+              <input type="radio" name="motorplassering" value="innenbords" />
+              <span>Innenbords</span>
+            </label>
+            <label class="radio">
+              <input type="radio" name="motorplassering" value="utenbords" />
+              <span>Utenbords</span>
+            </label>
+          </div>
+          <p class="error" id="err-motorplassering" hidden></p>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>Motortype</legend>
+          <div class="options">
+            <label class="radio">
+              <input type="radio" name="takt" value="2" />
+              <span>2-takts</span>
+            </label>
+            <label class="radio">
+              <input type="radio" name="takt" value="4" />
+              <span>4-takts</span>
+            </label>
+          </div>
+          <p class="error" id="err-takt" hidden></p>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>Ønsker for opplaget</legend>
+          <small class="hint">Valgfritt – huk av det du ønsker, så filtrerer vi resultatene.</small>
+          <div class="options">
+            <label class="check">
+              <input type="checkbox" name="plassering" value="innendors" />
+              <span>Innendørs</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" name="plassering" value="utendors" />
+              <span>Utendørs</span>
+            </label>
+          </div>
+          <div class="options">
+            <label class="check">
+              <input type="checkbox" name="temperatur" value="varmt" />
+              <span>Varmt</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" name="temperatur" value="kaldt" />
+              <span>Kaldt</span>
+            </label>
+          </div>
+          <div class="options">
+            <label class="check">
+              <input type="checkbox" name="fuktkontroll" value="ja" />
+              <span>Fuktkontroll <em class="note">– anbefalt for trebåt</em></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="btn-primary">Søk etter opplag</button>
+      </form>
+    </section>
+
+    <section id="results" class="results" aria-live="polite"></section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p>Demo med eksempeldata · BåtOpplag © 2026</p>
+    </div>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="models.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
